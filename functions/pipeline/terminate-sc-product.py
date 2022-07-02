@@ -22,7 +22,12 @@ def get_file(artifact, f_name):
             return json.loads(z.read(f_name))
 
 def get_role_arn():
-    return "/".join(sts.get_caller_identity()["Arn"].replace("assumed-role", "role").replace("sts", "iam").split("/")[0:-1])
+    return "/".join(
+        sts.get_caller_identity()["Arn"]
+        .replace("assumed-role", "role")
+        .replace("sts", "iam")
+        .split("/")[:-1]
+    )
 
 def terminate_product(portfolio_id, product_id):
 

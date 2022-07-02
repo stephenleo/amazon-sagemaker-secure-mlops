@@ -177,7 +177,7 @@ def get_pipeline(
         security_group_ids=security_group_ids,
         subnets=subnets,
         encrypt_inter_container_traffic=True)
-    
+
     # processing step for feature engineering
     sklearn_processor = SKLearnProcessor(
         framework_version="0.23-1",
@@ -190,7 +190,7 @@ def get_pipeline(
         volume_kms_key=ebs_kms_id,
         output_kms_key=s3_kms_id
     )
-    
+
     step_process = ProcessingStep(
         name="PreprocessAbaloneData",
         processor=sklearn_processor,
@@ -237,7 +237,7 @@ def get_pipeline(
         subsample=0.7,
         silent=0,
     )
-    
+
     step_train = TrainingStep(
         name="TrainAbaloneModel",
         estimator=xgb_train,
@@ -270,7 +270,7 @@ def get_pipeline(
         volume_kms_key=ebs_kms_id,
         output_kms_key=s3_kms_id
     )
-    
+
     evaluation_report = PropertyFile(
         name="AbaloneEvaluationReport",
         output_name="evaluation",
@@ -301,12 +301,11 @@ def get_pipeline(
     # register model step that will be conditionally executed
     model_metrics = ModelMetrics(
         model_statistics=MetricsSource(
-            s3_uri="{}/evaluation.json".format(
-                step_eval.arguments["ProcessingOutputConfig"]["Outputs"][0]["S3Output"]["S3Uri"]
-            ),
-            content_type="application/json"
+            s3_uri=f'{step_eval.arguments["ProcessingOutputConfig"]["Outputs"][0]["S3Output"]["S3Uri"]}/evaluation.json',
+            content_type="application/json",
         )
     )
+
 
     """
     There is a bug in RegisterModel implementation
@@ -357,8 +356,7 @@ def get_pipeline(
         else_steps=[],
     )
 
-    # pipeline instance
-    pipeline = Pipeline(
+    return Pipeline(
         name=pipeline_name,
         parameters=[
             processing_instance_type,
@@ -370,4 +368,3 @@ def get_pipeline(
         steps=[step_process, step_train, step_eval, step_cond],
         sagemaker_session=sagemaker_session,
     )
-    return pipeline

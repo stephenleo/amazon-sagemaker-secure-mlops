@@ -72,7 +72,7 @@ if __name__ == "__main__":
         account_ids = config["Accounts"].split(",")
     else: # get the caller account for single-account deployment
         account_ids = [boto_sts.get_caller_identity()["Account"]]
-      
+
     # Test the endpoint in each account of the target account list
     logger.info(f"Test endpoint for the accounts: {account_ids}")
     for account_id in account_ids:

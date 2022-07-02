@@ -43,23 +43,22 @@ if __name__ == "__main__":
         logger.info(f"Found an existing model package group: {model_package_group_arn}")
 
     except ClientError as e:
-        if e.response['Error']['Code'] == 'ValidationException':
-            # it doesn't exist, create a new one
-            logger.info(f"The model package group {args.model_package_group_name} is not found, creating a new one...")
-
-            model_package_group_arn = sm_client.create_model_package_group(
-                ModelPackageGroupName=args.model_package_group_name,
-                ModelPackageGroupDescription=f"Multi account model group for SageMaker project {args.sagemaker_project_name}",
-                Tags=[
-                    {'Key': 'sagemaker:project-name', 'Value': args.sagemaker_project_name},
-                    {'Key': 'sagemaker:project-id', 'Value': args.sagemaker_project_id},
-                    {'Key': 'EnvironmentName', 'Value':args.env_name},
-                    {'Key': 'EnvironmentType', 'Value':args.env_type},
-                ]
-            )['ModelPackageGroupArn']
-
-        else:
+        if e.response['Error']['Code'] != 'ValidationException':
             raise e
+
+        # it doesn't exist, create a new one
+        logger.info(f"The model package group {args.model_package_group_name} is not found, creating a new one...")
+
+        model_package_group_arn = sm_client.create_model_package_group(
+            ModelPackageGroupName=args.model_package_group_name,
+            ModelPackageGroupDescription=f"Multi account model group for SageMaker project {args.sagemaker_project_name}",
+            Tags=[
+                {'Key': 'sagemaker:project-name', 'Value': args.sagemaker_project_name},
+                {'Key': 'sagemaker:project-id', 'Value': args.sagemaker_project_id},
+                {'Key': 'EnvironmentName', 'Value':args.env_name},
+                {'Key': 'EnvironmentType', 'Value':args.env_type},
+            ]
+        )['ModelPackageGroupArn']
 
     if args.multi_account_deployment == "YES":
 
@@ -100,6 +99,6 @@ if __name__ == "__main__":
             })
         )
     else:
-        logger.info(f"Multi-account deployment is set to NO for this project")
+        logger.info("Multi-account deployment is set to NO for this project")
             
     

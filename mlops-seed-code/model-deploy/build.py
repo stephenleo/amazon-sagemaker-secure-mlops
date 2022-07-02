@@ -33,7 +33,7 @@ def get_approved_package(model_package_group_name):
             approved_packages.extend(p["ModelPackageSummaryList"])
 
         # Return error if no packages found
-        if len(approved_packages) == 0:
+        if not approved_packages:
             error_message = (
                 f"No approved ModelPackage found for ModelPackageGroup: {model_package_group_name}"
             )

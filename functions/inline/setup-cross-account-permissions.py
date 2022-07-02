@@ -24,11 +24,11 @@ def lambda_handler(event, context):
                 s3_vpce_ssm_param_name=event['ResourceProperties']['S3VPCESSMParamName'],
                 kms_vpce_ssm_pram_name=event['ResourceProperties']['KMSVPCESSMParamName'],
             )
-            
+
         cfnresponse.send(event, context, response_status, r, '')
 
     except Exception as e:
-        print(str(e))
+        print(e)
         cfnresponse.send(event, context, cfnresponse.FAILED, {}, physicalResourceId=event.get('PhysicalResourceId'), reason=str(e))
 
 def get_ssm_parameter(accounts, role, p_name):
@@ -37,8 +37,9 @@ def get_ssm_parameter(accounts, role, p_name):
         print(f"assume the role {role} in {account_id}")
         stsresponse = sts.assume_role(
             RoleArn=f"arn:aws:iam::{account_id}:role/{role}",
-            RoleSessionName=f"newsession"
+            RoleSessionName="newsession",
         )
+
 
         values.append(
             boto3.client("ssm",
@@ -52,10 +53,7 @@ def get_ssm_parameter(accounts, role, p_name):
     return values
 
 def append_list(value, list):
-    if type(value) is str:
-        return list + [value]
-    else: 
-        return list + value
+    return list + [value] if type(value) is str else list + value
 
 def setup_policy(
     policy,

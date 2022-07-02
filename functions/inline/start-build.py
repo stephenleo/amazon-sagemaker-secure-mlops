@@ -12,9 +12,9 @@ def lambda_handler(event, context):
 
         if 'RequestType' in event and event['RequestType'] == 'Create':
             cb.start_build(projectName=event['ResourceProperties']['ProjectName'])
-            
+
         cfnresponse.send(event, context, response_status, {}, '')
 
     except Exception as e:
-        print(str(e))
+        print(e)
         cfnresponse.send(event, context, cfnresponse.FAILED, {}, physicalResourceId=event.get('PhysicalResourceId'), reason=str(e))

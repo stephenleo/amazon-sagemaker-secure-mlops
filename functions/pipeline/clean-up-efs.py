@@ -19,13 +19,13 @@ def delete_efs(sm_domain_id, delete_vpc=False):
         fs["FileSystemId"] for fs in efs.describe_file_systems()["FileSystems"] 
             if fs.get("Tags") and [t["Value"] for t in fs["Tags"] if t["Key"]=="ManagedByAmazonSageMakerResource"][0].split("/")[-1] == sm_domain_id
         ]:
-        
+
         print(f"Delete mount targets for EFS file system id: {id}")
         for mt in efs.describe_mount_targets(FileSystemId=id)["MountTargets"]:
             efs.delete_mount_target(MountTargetId=mt["MountTargetId"])
             vpc_id = mt["VpcId"]
             subnets.append(mt["SubnetId"])
-        
+
         while len(efs.describe_mount_targets(FileSystemId=id)["MountTargets"]) > 0:
             print("Wait until mount targets have been deleted")
             time.sleep(5)

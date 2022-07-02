@@ -23,12 +23,23 @@ def delete_apps(domain_id):
         for a in p['Apps']:
             if a['AppType'] == 'KernelGateway' and a['Status'] != 'Deleted':
                 sm_client.delete_app(DomainId=a['DomainId'], UserProfileName=a['UserProfileName'], AppType=a['AppType'], AppName=a['AppName'])
-        
+
     apps = 1
     while apps:
-        apps = 0
-        for p in sm_client.get_paginator('list_apps').paginate(DomainIdEquals=domain_id):
-            apps += len([a['AppName'] for a in p['Apps'] if a['AppType'] == 'KernelGateway' and a['Status'] != 'Deleted'])
+        apps = sum(
+            len(
+                [
+                    a['AppName']
+                    for a in p['Apps']
+                    if a['AppType'] == 'KernelGateway'
+                    and a['Status'] != 'Deleted'
+                ]
+            )
+            for p in sm_client.get_paginator('list_apps').paginate(
+                DomainIdEquals=domain_id
+            )
+        )
+
         logging.info(f'Number of active KernelGateway apps: {str(apps)}')
         time.sleep(5)
 
@@ -42,7 +53,7 @@ def lambda_handler(event, context):
     try:
         if event['RequestType'] in ['Create', 'Update']:
             physicalResourceId = event.get('ResourceProperties')['DomainId']
-   
+
         elif event['RequestType'] == 'Delete':        
             delete_apps(physicalResourceId)
 
